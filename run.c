@@ -36,7 +36,7 @@ THIS SOFTWARE.
 #include <stdlib.h>
 #include <time.h>
 #include <sys/types.h>
-#include <sys/wait.h>
+#include "sys/wait.h"
 #include "awk.h"
 #include "awkgram.tab.h"
 
@@ -1671,7 +1671,7 @@ Cell *bltin(Node **a, int n)	/* builtin functions. a[0] is type, a[1] is arg lis
 		/* random() returns numbers in [0..2^31-1]
 		 * in order to get a number in [0, 1), divide it by 2^31
 		 */
-		u = (Awkfloat) random() / (0x7fffffffL + 0x1UL);
+		u = (Awkfloat) rand() / (0x7fff + 0x1U);
 		break;
 	case FSRAND:
 		if (isrec(x))	/* no argument provided */
@@ -1679,7 +1679,7 @@ Cell *bltin(Node **a, int n)	/* builtin functions. a[0] is type, a[1] is arg lis
 		else
 			u = getfval(x);
 		tmp = u;
-		srandom((unsigned long) u);
+		srand((unsigned int) u);
 		u = srand_seed;
 		srand_seed = tmp;
 		break;
@@ -1844,8 +1844,8 @@ FILE *openfile(int a, const char *us, bool *pnewflag)
 		files[i].mode = m;
 		if (pnewflag)
 			*pnewflag = true;
-		if (fp != stdin && fp != stdout && fp != stderr)
-			(void) fcntl(fileno(fp), F_SETFD, FD_CLOEXEC);
+		//if (fp != stdin && fp != stdout && fp != stderr)
+		//	(void) fcntl(fileno(fp), F_SETFD, FD_CLOEXEC);
 	}
 	return fp;
 }

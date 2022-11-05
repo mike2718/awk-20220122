@@ -22,46 +22,48 @@
 # THIS SOFTWARE.
 # ****************************************************************/
 
-CFLAGS = -fsanitize=address -O1 -g -fno-omit-frame-pointer -fno-optimize-sibling-calls
-CFLAGS = -g
-CFLAGS =
-CFLAGS = -O2
+CFLAGS = /nologo /MD /O2 /W3 /TC /DNDEBUG /DWIN32 /D_CONSOLE \
+         /D_CRT_SECURE_NO_WARNINGS /D_SECURE_CRT_NO_DEPRECATE
 
 # compiler options
 #CC = gcc -Wall -g -Wwrite-strings
 #CC = gcc -O4 -Wall -pedantic -fno-strict-aliasing
 #CC = gcc -fprofile-arcs -ftest-coverage # then gcov f1.c; cat f1.c.gcov
-HOSTCC = gcc -g -Wall -pedantic -Wcast-qual
-CC = $(HOSTCC)  # change this is cross-compiling.
+CC = cl
 
 # By fiat, to make our lives easier, yacc is now defined to be bison.
 # If you want something else, you're on your own.
-YACC = bison -d
+YACC = E:\build\win_flex_bison-2.5.25\win_bison.exe -d
 
-OFILES = b.o main.o parse.o proctab.o tran.o lib.o run.o lex.o
+OFILES = b.obj main.obj parse.obj proctab.obj tran.obj lib.obj run.obj lex.obj \
+         missing95.obj
 
 SOURCE = awk.h awkgram.tab.c awkgram.tab.h proto.h awkgram.y lex.c b.c main.c \
-	maketab.c parse.c lib.c run.c tran.c proctab.c
+	maketab.c parse.c lib.c run.c tran.c proctab.c missing95.c
 
 LISTING = awk.h proto.h awkgram.y lex.c b.c main.c maketab.c parse.c \
-	lib.c run.c tran.c
+	lib.c run.c tran.c missing95.c
 
 SHIP = README LICENSE FIXES $(SOURCE) awkgram.tab.[ch].bak makefile  \
 	 awk.1
 
-a.out:	awkgram.tab.o $(OFILES)
-	$(CC) $(CFLAGS) awkgram.tab.o $(OFILES) $(ALLOC)  -lm
+awk.exe:	awkgram.tab.obj $(OFILES)
+	link /nologo /out:awk.exe /machine:x86 /incremental:no /subsystem:console \
+    awkgram.tab.obj $(OFILES) $(ALLOC) setargv.obj
+
+%.obj: %.c
+	$(CC) $(CFLAGS) /c /Fo$@ $<
 
 $(OFILES):	awk.h awkgram.tab.h proto.h
 
 awkgram.tab.c awkgram.tab.h:	awk.h proto.h awkgram.y
 	$(YACC) $(YFLAGS) awkgram.y
 
-proctab.c:	maketab
-	./maketab awkgram.tab.h >proctab.c
+proctab.c:	maketab.exe
+	.\maketab.exe awkgram.tab.h > proctab.c
 
-maketab:	awkgram.tab.h maketab.c
-	$(HOSTCC) $(CFLAGS) maketab.c -o maketab
+maketab.exe:	awkgram.tab.h maketab.c
+	$(CC) $(CFLAGS) /Femaketab.exe maketab.c
 
 bundle:
 	@cp awkgram.tab.h awkgram.tab.h.bak
@@ -95,11 +97,11 @@ names:
 test check:
 	./REGRESS
 
-clean: testclean
-	rm -f a.out *.o *.obj maketab maketab.exe *.bb *.bbg *.da *.gcov *.gcno *.gcda # proctab.c
+clean:
+	del /q awk.exe a.out *.o *.obj maketab maketab.exe *.bb *.bbg *.da *.gcov *.gcno *.gcda # proctab.c
 
-cleaner: testclean
-	rm -f a.out *.o *.obj maketab maketab.exe *.bb *.bbg *.da *.gcov *.gcno *.gcda proctab.c awkgram.tab.*
+cleaner:
+	del /q awk.exe a.out *.o *.obj maketab maketab.exe *.bb *.bbg *.da *.gcov *.gcno *.gcda proctab.c awkgram.tab.*
 
 # This is a bit of a band-aid until we can invest some more time
 # in the test suite.

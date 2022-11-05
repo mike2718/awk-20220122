@@ -25,7 +25,7 @@ THIS SOFTWARE.
 #define DEBUG
 #include <stdio.h>
 #include <string.h>
-#include <strings.h>
+#include "strings.h"
 #include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>

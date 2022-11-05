@@ -38,6 +38,7 @@ extern	int	yylook(void);
 extern	int	yyback(int *, int);
 extern	int	yyinput(void);
 
+#define __attribute__(x)
 extern	fa	*makedfa(const char *, bool);
 extern	fa	*mkdfa(const char *, bool);
 extern	int	makeinit(fa *, bool);
